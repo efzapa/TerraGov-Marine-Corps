@@ -71,7 +71,7 @@
 	if(maxcharge <= 2500)
 		. += "The manufacturer's label states this cell has a power rating of [maxcharge], and that you should not swallow it.\nThe charge meter reads [round(src.percent() )]%."
 	else
-		. += "This power cell has an exciting chrome finish, as it is an uber-capacity cell type! It has a power rating of [maxcharge]!\nThe charge meter reads [round(src.percent() )]%."
+		. += "This power cell has a lavish finish, as it is an uber-capacity cell type! It has a power rating of [maxcharge]!\nThe charge meter reads [round(src.percent() )]%."
 	if(crit_fail)
 		. += span_warning("This power cell seems to be faulty.")
 	if(rigged)
