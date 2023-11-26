@@ -1,12 +1,15 @@
 /obj/machinery/griddle
 	name = "griddle"
 	desc = "Because using pans is for pansies."
-	icon = 'icons/obj/machines/kitchenmachines.dmi'
+	icon = 'icons/obj/machines/kitchen.dmi'
 	icon_state = "griddle1_off"
 	density = TRUE
-	use_power = IDLE_POWER_USE
-	idle_power_usage = 5
+	allow_pass_flags = PASSMACHINE | PASSTABLE| LETPASSTHROW // It's roughly the height of a table.
+	idle_power_usage = IDLE_POWER_USE * 0.05
+	active_power_usage = ACTIVE_POWER_USE
 	layer = BELOW_OBJ_LAYER
+	processing_flags = START_PROCESSING_MANUALLY
+	resistance_flags = FIRE_PROOF
 
 	///Things that are being griddled right now
 	var/list/griddled_objects = list()
@@ -24,61 +27,88 @@
 	grill_loop = new(src, FALSE)
 	if(isnum(variant))
 		variant = rand(1,3)
+	RegisterSignal(src, COMSIG_ATOM_EXPOSE_REAGENT, PROC_REF(on_expose_reagent))
+	RegisterSignal(src, COMSIG_STORAGE_DUMP_CONTENT, PROC_REF(on_storage_dump))
 
 /obj/machinery/griddle/Destroy()
 	QDEL_NULL(grill_loop)
-	. = ..()
+	return ..()
 
 /obj/machinery/griddle/crowbar_act(mob/living/user, obj/item/I)
 	. = ..()
-	if(flags_atom & NODECONSTRUCT)
+	if(flags_1 & NODECONSTRUCT_1)
 		return
 	if(default_deconstruction_crowbar(I, ignore_panel = TRUE))
 		return
 	variant = rand(1,3)
 
+/obj/machinery/griddle/crowbar_act(mob/living/user, obj/item/I)
+	. = ..()
+	return default_deconstruction_crowbar(I, ignore_panel = TRUE)
+
+
 /obj/machinery/griddle/attackby(obj/item/I, mob/user, params)
-	if(length(griddled_objects) >= max_items)
+	if(griddled_objects.len >= max_items)
 		to_chat(user, span_notice("[src] can't fit more items!"))
 		return
 	var/list/modifiers = params2list(params)
 	//Center the icon where the user clicked.
-	if(!LAZYACCESS(modifiers, "icon-x") || !LAZYACCESS(modifiers, "icon-y"))
+	if(!LAZYACCESS(modifiers, ICON_X) || !LAZYACCESS(modifiers, ICON_Y))
 		return
-	if(user.transferItemToLoc(I, src))
+	if(user.transferItemToLoc(I, src, silent = FALSE))
 		//Clamp it so that the icon never moves more than 16 pixels in either direction (thus leaving the table turf)
-		I.pixel_x = clamp(text2num(LAZYACCESS(modifiers, "icon-x")) - 16, -(world.icon_size/2), world.icon_size/2)
-		I.pixel_y = clamp(text2num(LAZYACCESS(modifiers, "icon-y")) - 16, -(world.icon_size/2), world.icon_size/2)
+		I.pixel_x = clamp(text2num(LAZYACCESS(modifiers, ICON_X)) - 16, -(world.icon_size/2), world.icon_size/2)
+		I.pixel_y = clamp(text2num(LAZYACCESS(modifiers, ICON_Y)) - 16, -(world.icon_size/2), world.icon_size/2)
 		to_chat(user, span_notice("You place [I] on [src]."))
 		AddToGrill(I, user)
-		update_icon()
-		return
-	return ..()
+	else
+		return ..()
 
 /obj/machinery/griddle/attack_hand(mob/user, list/modifiers)
 	. = ..()
+	toggle_mode()
+
+/obj/machinery/griddle/proc/toggle_mode()
 	on = !on
 	if(on)
-		START_PROCESSING(SSmachines, src)
+		begin_processing()
 	else
-		STOP_PROCESSING(SSmachines, src)
-	update_icon()
+		end_processing()
+	update_icon() //maybe works?
 	update_grill_audio()
 
+/obj/machinery/griddle/begin_processing()
+	. = ..()
+	for(var/obj/item/item_to_grill as anything in griddled_objects)
+		SEND_SIGNAL(item_to_grill, COMSIG_ITEM_GRILL_TURNED_ON)
+
+/obj/machinery/griddle/end_processing()
+	. = ..()
+	for(var/obj/item/item_to_grill as anything in griddled_objects)
+		SEND_SIGNAL(item_to_grill, COMSIG_ITEM_GRILL_TURNED_OFF)
 
 /obj/machinery/griddle/proc/AddToGrill(obj/item/item_to_grill, mob/user)
 	vis_contents += item_to_grill
 	griddled_objects += item_to_grill
+	item_to_grill.flags_1 |= IS_ONTOP_1
+	item_to_grill.vis_flags |= VIS_INHERIT_PLANE
+
+	SEND_SIGNAL(item_to_grill, COMSIG_ITEM_GRILL_PLACED, user)
+	if(on)
+		SEND_SIGNAL(item_to_grill, COMSIG_ITEM_GRILL_TURNED_ON)
 	RegisterSignal(item_to_grill, COMSIG_MOVABLE_MOVED, PROC_REF(ItemMoved))
-	RegisterSignal(item_to_grill, COMSIG_GRILL_COMPLETED, PROC_REF(GrillCompleted))
+	RegisterSignal(item_to_grill, COMSIG_ITEM_GRILLED, PROC_REF(GrillCompleted))
 	RegisterSignal(item_to_grill, COMSIG_QDELETING, PROC_REF(ItemRemovedFromGrill))
 	update_grill_audio()
+	update_icon() //maybe works?
 
-/obj/machinery/griddle/proc/ItemRemovedFromGrill(obj/item/I)
+/obj/machinery/griddle/proc/ItemRemovedFromGrill(obj/item/ungrill)
 	SIGNAL_HANDLER
-	griddled_objects -= I
-	vis_contents -= I
-	UnregisterSignal(I, list(COMSIG_GRILL_COMPLETED, COMSIG_MOVABLE_MOVED, COMSIG_QDELETING))
+	ungrill.flags_1 &= ~IS_ONTOP_1
+	ungrill.vis_flags &= ~VIS_INHERIT_PLANE
+	griddled_objects -= ungrill
+	vis_contents -= ungrill
+	UnregisterSignal(ungrill, list(COMSIG_ITEM_GRILLED, COMSIG_MOVABLE_MOVED, COMSIG_QDELETING))
 	update_grill_audio()
 
 /obj/machinery/griddle/proc/ItemMoved(obj/item/I, atom/OldLoc, Dir, Forced)
@@ -90,30 +120,44 @@
 	AddToGrill(grilled_result)
 
 /obj/machinery/griddle/proc/update_grill_audio()
-	if(on && length(griddled_objects))
+	if(on && griddled_objects.len)
 		grill_loop.start()
 	else
 		grill_loop.stop()
 
-/obj/machinery/griddle/wrench_act(mob/living/user, obj/item/I)
-	..()
-	balloon_alert(user, "You begin [anchored ? "un" : ""]securing...")
-	I.play_tool_sound(src, 50)
-	if(!I.use_tool(src, user, 2 SECONDS))
-		return FALSE
-	balloon_alert(user, "You [anchored ? "un" : ""]secure.")
-	anchored = !anchored
-	playsound(src, 'sound/items/deconstruct.ogg', 50, TRUE)
-	return TRUE
+/obj/machinery/griddle/wrench_act(mob/living/user, obj/item/tool)
+	. = ..()
+	default_unfasten_wrench(user, tool, time = 2 SECONDS)
+	return TOOL_ACT_TOOLTYPE_SUCCESS
 
-/obj/machinery/griddle/process(delta_time)
-	..()
-	for(var/obj/item/griddled_item AS in griddled_objects)
-		if(SEND_SIGNAL(griddled_item, COMSIG_ITEM_GRILLED, src, delta_time) & COMPONENT_HANDLED_GRILLING)
+/obj/machinery/griddle/proc/on_storage_dump(datum/source, obj/item/storage_source, mob/user)
+	SIGNAL_HANDLER
+
+	for(var/obj/item/to_dump in storage_source)
+		if(to_dump.loc != storage_source)
+			continue
+		if(griddled_objects.len >= max_items)
+			break
+
+		if(!storage_source.atom_storage.attempt_remove(to_dump, src, silent = TRUE))
+			continue
+
+		to_dump.pixel_x = to_dump.base_pixel_x + rand(-5, 5)
+		to_dump.pixel_y = to_dump.base_pixel_y + rand(-5, 5)
+		AddToGrill(to_dump, user)
+
+	to_chat(user, span_notice("You dump out [storage_source] onto [src]."))
+	return STORAGE_DUMP_HANDLED
+
+/obj/machinery/griddle/process(seconds_per_tick)
+	for(var/obj/item/griddled_item as anything in griddled_objects)
+		if(SEND_SIGNAL(griddled_item, COMSIG_ITEM_GRILL_PROCESS, src, seconds_per_tick) & COMPONENT_HANDLED_GRILLING)
 			continue
 		griddled_item.fire_act(1000) //Hot hot hot!
 		if(prob(10))
 			visible_message(span_danger("[griddled_item] doesn't seem to be doing too great on the [src]!"))
+
+		use_power(active_power_usage)
 
 /obj/machinery/griddle/update_icon_state()
 	icon_state = "griddle[variant]_[on ? "on" : "off"]"
@@ -127,6 +171,3 @@
 /obj/machinery/griddle/stand/update_overlays()
 	. = ..()
 	. += "front_bar"
-
-/obj/machinery/griddle/nopower
-	use_power = NO_POWER_USE

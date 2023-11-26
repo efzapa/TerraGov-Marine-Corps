@@ -4,6 +4,7 @@
 	appearance_flags = TILE_BOUND
 	var/level = 2
 
+
 	var/flags_atom = NONE
 	var/datum/reagents/reagents = null
 
@@ -1047,3 +1048,4 @@ Proc for attack log creation, because really why not
 ///Adds the debris element for projectile impacts
 /atom/proc/add_debris_element()
 	AddElement(/datum/element/debris, null, -15, 8, 0.7)
+
