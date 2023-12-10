@@ -55,9 +55,11 @@
 	. = ..()
 	if(!.)
 		return
+	ADD_TRAIT(owner, TRAIT_INCAPACITATED, TRAIT_STATUS_EFFECT(id))
 	ADD_TRAIT(owner, TRAIT_FLOORED, TRAIT_STATUS_EFFECT(id))
 
 /datum/status_effect/incapacitating/knockdown/on_remove()
+	REMOVE_TRAIT(owner, TRAIT_INCAPACITATED, TRAIT_STATUS_EFFECT(id))
 	REMOVE_TRAIT(owner, TRAIT_FLOORED, TRAIT_STATUS_EFFECT(id))
 	return ..()
 
@@ -546,7 +548,7 @@
 /datum/status_effect/stacking/intoxicated/proc/resist_debuff()
 	if(length(debuff_owner.do_actions))
 		return
-	if(!do_after(debuff_owner, 5 SECONDS, TRUE, debuff_owner, BUSY_ICON_GENERIC))
+	if(!do_after(debuff_owner, 5 SECONDS, NONE, debuff_owner, BUSY_ICON_GENERIC))
 		debuff_owner?.balloon_alert(debuff_owner, "Interrupted")
 		return
 	if(!debuff_owner)

@@ -137,6 +137,12 @@
 /obj/machinery/door/window/secure/bridge,
 /turf/open/floor/plating/mainship,
 /area/mainship/command/cic)
+"alz" = (
+/obj/machinery/computer/squad_selector,
+/turf/open/floor/mainship/black{
+	dir = 1
+	},
+/area/mainship/squads/general)
 "alH" = (
 /obj/effect/decal/cleanable/cobweb,
 /turf/open/floor/mainship/tcomms,
@@ -556,8 +562,7 @@
 /turf/open/floor/prison/kitchen,
 /area/mainship/living/kitchen)
 "aKr" = (
-/obj/structure/table/mainship,
-/obj/item/folder/white,
+/obj/machinery/computer/squad_manager,
 /turf/open/floor/mainship,
 /area/mainship/squads/general)
 "aKD" = (
@@ -3173,9 +3178,6 @@
 /turf/open/floor/mainship/floor,
 /area/mainship/hallways/hangar)
 "dUt" = (
-/obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{
-	dir = 4
-	},
 /obj/machinery/door/firedoor/multi_tile{
 	dir = 1
 	},
@@ -3463,7 +3465,7 @@
 /turf/open/floor/mainship/mono,
 /area/mainship/hallways/hangar)
 "eiY" = (
-/obj/machinery/cloning_console/vats,
+/obj/machinery/computer/cloning_console/vats,
 /turf/open/floor/mainship/sterile/side{
 	dir = 1
 	},
@@ -6010,7 +6012,7 @@
 /obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1{
 	dir = 4
 	},
-/obj/machinery/autodoc_console,
+/obj/machinery/computer/autodoc_console,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/hidden{
 	dir = 4
 	},
@@ -6402,7 +6404,7 @@
 /turf/open/floor/mainship/mono,
 /area/mainship/living/botany)
 "iiC" = (
-/obj/machinery/body_scanconsole,
+/obj/machinery/computer/body_scanconsole,
 /obj/structure/cable,
 /obj/machinery/light/mainship{
 	dir = 4
@@ -7011,7 +7013,6 @@
 /area/mainship/hull/lower_hull)
 "iXB" = (
 /obj/machinery/atmospherics/pipe/simple/supply/hidden/layer1,
-/obj/machinery/atmospherics/pipe/simple/scrubbers/hidden,
 /obj/machinery/atmospherics/pipe/simple/scrubbers/hidden,
 /obj/machinery/holopad,
 /obj/effect/turf_decal/warning_stripes/thin{
@@ -9571,7 +9572,7 @@
 	},
 /area/mainship/medical/upper_medical)
 "lYL" = (
-/obj/machinery/sleep_console,
+/obj/machinery/computer/sleep_console,
 /turf/open/floor/mainship/sterile/side,
 /area/mainship/medical/lower_medical)
 "mam" = (
@@ -11893,6 +11894,7 @@
 /obj/machinery/light/mainship{
 	dir = 8
 	},
+/obj/machinery/computer/squad_selector,
 /turf/open/floor/mainship/black{
 	dir = 9
 	},
@@ -16630,7 +16632,7 @@
 	},
 /area/mainship/command/airoom)
 "uMj" = (
-/obj/machinery/body_scanconsole,
+/obj/machinery/computer/body_scanconsole,
 /turf/open/floor/mainship/sterile/dark,
 /area/mainship/medical/lower_medical)
 "uMG" = (
@@ -55311,7 +55313,7 @@ gUJ
 pRo
 lFo
 dZY
-eYx
+alz
 lTQ
 lOp
 aDz

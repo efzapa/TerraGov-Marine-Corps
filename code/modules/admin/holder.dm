@@ -288,6 +288,7 @@ GLOBAL_PROTECT(admin_verbs_default)
 	/datum/admins/proc/jump_key,
 	/datum/admins/proc/secrets_panel,
 	/datum/admins/proc/remove_from_tank,
+	/datum/admins/proc/delete_squad,
 	/datum/admins/proc/game_panel,
 	/datum/admins/proc/mode_panel,
 	/datum/admins/proc/job_slots,
@@ -495,7 +496,7 @@ GLOBAL_PROTECT(admin_verbs_spawn)
 	/datum/admins/proc/logs_server,
 	/datum/admins/proc/logs_current,
 	/datum/admins/proc/logs_folder,
-	/datum/admins/proc/log_panel,
+	/client/proc/log_viewer_new
 	)
 GLOBAL_LIST_INIT(admin_verbs_log, world.AVlog())
 GLOBAL_PROTECT(admin_verbs_log)

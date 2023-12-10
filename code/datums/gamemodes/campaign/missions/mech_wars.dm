@@ -15,8 +15,8 @@
 
 /datum/campaign_mission/tdm/mech_wars/play_start_intro()
 	intro_message = list(
-		"starting_faction" = "[map_name]<br>" + "[GAME_YEAR]-[time2text(world.realtime, "MM-DD")] [stationTimestamp("hh:mm")]<br>" + "Eliminate all [hostile_faction] resistance in the AO. Reinforcements are limited so preserve your forces as best you can. Good hunting!",
-		"hostile_faction" = "[map_name]<br>" + "[GAME_YEAR]-[time2text(world.realtime, "MM-DD")] [stationTimestamp("hh:mm")]<br>" + "Eliminate all [starting_faction] resistance in the AO. Reinforcements are limited so preserve your forces as best you can. Good hunting!",
+		MISSION_STARTING_FACTION = "[map_name]<br>" + "[GAME_YEAR]-[time2text(world.realtime, "MM-DD")] [stationTimestamp("hh:mm")]<br>" + "Eliminate all [hostile_faction] resistance in the AO. Reinforcements are limited so preserve your forces as best you can. Good hunting!",
+		MISSION_HOSTILE_FACTION = "[map_name]<br>" + "[GAME_YEAR]-[time2text(world.realtime, "MM-DD")] [stationTimestamp("hh:mm")]<br>" + "Eliminate all [starting_faction] resistance in the AO. Reinforcements are limited so preserve your forces as best you can. Good hunting!",
 	)
 	. = ..()
 
@@ -112,7 +112,7 @@
 /obj/effect/landmark/campaign/mech_spawner/som
 	name = "som med mech spawner"
 	faction = FACTION_SOM
-	colors = list(ARMOR_PALETTE_BEIGE, ARMOR_PALETTE_BLACK, VISOR_PALETTE_SYNDIE_GREEN)
+	colors = list(ARMOR_PALETTE_GINGER, ARMOR_PALETTE_BLACK, VISOR_PALETTE_SYNDIE_GREEN)
 
 /obj/effect/landmark/campaign/mech_spawner/som/heavy
 	name = "som heavy mech spawner"

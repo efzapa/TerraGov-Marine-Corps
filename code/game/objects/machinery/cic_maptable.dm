@@ -7,6 +7,10 @@
 	use_power = IDLE_POWER_USE
 	density = TRUE
 	idle_power_usage = 2
+	light_range = 2
+	light_power = 0.5
+	light_color = LIGHT_COLOR_BLUE
+	var/screen_overlay = "maptable_screen"
 	///flags that we want to be shown when you interact with this table
 	var/minimap_flag = MINIMAP_FLAG_MARINE
 	///by default Zlevel 2, groundside is targetted
@@ -19,17 +23,32 @@
 /obj/machinery/cic_maptable/Initialize(mapload)
 	. = ..()
 	RegisterSignal(SSdcs, COMSIG_GLOB_CAMPAIGN_MISSION_LOADED, PROC_REF(change_targeted_z))
+	update_icon()
 
 /obj/machinery/cic_maptable/Destroy()
 	map = null
 	return ..()
 
+/obj/machinery/cic_maptable/update_icon()
+	. = ..()
+	if(machine_stat & (BROKEN|DISABLED|NOPOWER))
+		set_light(0)
+	else
+		set_light(initial(light_range))
+
+/obj/machinery/cic_maptable/update_overlays()
+	. = ..()
+	if(machine_stat & (BROKEN|DISABLED|NOPOWER))
+		return
+	. += emissive_appearance(icon, screen_overlay, alpha = src.alpha)
+	. += mutable_appearance(icon, screen_overlay, alpha = src.alpha)
+
 /obj/machinery/cic_maptable/interact(mob/user)
 	. = ..()
 	if(.)
 		return
-	if(interact_checks())
-		return
+	if(interact_checks(user))
+		return TRUE
 	if(!map)
 		map = SSminimaps.fetch_minimap_object(targetted_zlevel, minimap_flag)
 	user.client.screen += map
@@ -71,13 +90,18 @@
 	name = "Athena tactical map console"
 	desc = "A map that display the planetside AO, specialized in revealing potential areas to drop pod. This is especially useful to see where the frontlines and marines are at so that anyone droppodding can decide where to land. Pray that your land nav skills are robust to not get lost!"
 	icon_state = "droppodtable"
+	screen_overlay = "droppodtable_emissive"
 
 /obj/machinery/cic_maptable/som_maptable
+	icon_state = "som_console"
+	screen_overlay = "som_maptable_screen"
 	minimap_flag = MINIMAP_FLAG_MARINE_SOM
+	light_color = LIGHT_COLOR_FLARE
 
 /obj/machinery/cic_maptable/no_flags
 	minimap_flag = NONE
 
+//Exactly the same but you can draw on the map
 /obj/machinery/cic_maptable/drawable
 	desc = "A table that displays a map of the current target location that also allows drawing onto it"
 	/// List of references to the tools we will be using to shape what the map looks like
@@ -143,11 +167,8 @@
 		tool.zlevel = new_z
 		tool.set_zlevel(new_z, tool.minimap_flag)
 
-/////////////////////////////////////
-
 /obj/machinery/cic_maptable/drawable/big
 	icon = 'icons/Marine/mainship_props96.dmi'
-	icon_state = "maptable"
 	layer = ABOVE_OBJ_LAYER
 	pixel_x = -16
 	pixel_y = -14
@@ -156,3 +177,6 @@
 
 /obj/machinery/cic_maptable/drawable/big/som
 	minimap_flag = MINIMAP_FLAG_MARINE_SOM
+	screen_overlay = "som_maptable_screen"
+	light_color = LIGHT_COLOR_FLARE
+	light_range = 3
